@@ -1,5 +1,5 @@
 {
-    "name": "NeuroseSA/ecommerce",
+    "name": "neurosesa/ecommerce",
     "authors": [
         {
             "name": "Alex Junior",
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "": "vendor\\hcodebr\\php-classes\\src"
+            "Hcode\\": "vendor\\hcodebr\\php-classes\\src"
         }
     }
 }
