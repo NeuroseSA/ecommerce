@@ -26,7 +26,7 @@ $app->get('/admin', function() {
 
 	$page = new PageAdmin();
 
-	$page->setTpl("index");
+	$page->setTpl("index");	
 
 });
 
@@ -304,6 +304,21 @@ $app->post("/admin/categories/:idcategory", function($idcategory){
 
 	header("Location: /admin/categories");
 	exit;
+
+});
+
+$app->get("/categories/:idcategory", function($idcategory){
+
+	$category = new Category();
+
+	$category->get((int)$idcategory);
+
+	$page = new Page();
+
+	$page->setTpl("category", [
+		'category'=>$category->getValues(),
+		'products'=>[]
+	]);
 
 });
 
