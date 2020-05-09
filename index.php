@@ -12,6 +12,7 @@ $app = new Slim();
 
 $app->config('debug', true);
 
+require_once("rota_functions.php");
 require_once("rota_site.php");
 require_once("rota_admin.php");
 require_once("rota_admin_users.php");
