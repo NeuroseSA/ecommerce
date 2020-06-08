@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 use \Hcode\Page;
 use \Hcode\Model\Product;
@@ -12,15 +12,14 @@ $app->get('/', function() {
 	$page = new Page();
 
 	$page->setTpl("index", [
-		 'products'=>Product::checkList($products)
+		'products'=>Product::checkList($products)
 	]);
 
 });
 
-
 $app->get("/categories/:idcategory", function($idcategory){
 
-	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1; 
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
 
 	$category = new Category();
 
@@ -31,7 +30,7 @@ $app->get("/categories/:idcategory", function($idcategory){
 	$pages = [];
 
 	for ($i=1; $i <= $pagination['pages']; $i++) { 
-		array_push($pages,[
+		array_push($pages, [
 			'link'=>'/categories/'.$category->getidcategory().'?page='.$i,
 			'page'=>$i
 		]);
@@ -68,14 +67,14 @@ $app->get("/cart", function(){
 
 	$page = new Page();
 
-	$page->setTpl("cart",[
+	$page->setTpl("cart", [
 		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts()
+		'products'=>$cart->getProducts(),
+		'error'=>Cart::getMsgError()
 	]);
 
 });
 
-//Adiciona produto ao carrinho
 $app->get("/cart/:idproduct/add", function($idproduct){
 
 	$product = new Product();
@@ -87,7 +86,7 @@ $app->get("/cart/:idproduct/add", function($idproduct){
 	$qtd = (isset($_GET['qtd'])) ? (int)$_GET['qtd'] : 1;
 
 	for ($i = 0; $i < $qtd; $i++) {
-
+		
 		$cart->addProduct($product);
 
 	}
@@ -127,5 +126,15 @@ $app->get("/cart/:idproduct/remove", function($idproduct){
 
 });
 
+$app->post("/cart/freight", function(){
+
+	$cart = Cart::getFromSession();
+
+	$cart->setFreight($_POST['zipcode']);
+
+	header("Location: /cart");
+	exit;
+
+});
 
 ?>
