@@ -10,12 +10,14 @@ class User extends Model {
 
 	const SESSION = "User";
 	const SECRET = "HcodePhp7_Secret";
+	const ERROR = "UserError";
 
-	public static function getFromSession(){
+	public static function getFromSession()
+	{
 
 		$user = new User();
 
-		if(isse($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0){			
+		if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0) {
 
 			$user->setData($_SESSION[User::SESSION]);
 
@@ -25,23 +27,26 @@ class User extends Model {
 
 	}
 
-	public function checkLogin(){
+	public static function checkLogin($inadmin = true)
+	{
 
-		if (!isset($_SESSION[User::SESSION])
+		if (
+			!isset($_SESSION[User::SESSION])
 			||
 			!$_SESSION[User::SESSION]
 			||
 			!(int)$_SESSION[User::SESSION]["iduser"] > 0
-			){
-				//usuário não esta logado.
-				return false;
+		) {
+			//Não está logado
+			return false;
+
 		} else {
 
-			if($inadmin === true && (bool)$_SESSION[User::SESSION]['inadmin'] === true){
+			if ($inadmin === true && (bool)$_SESSION[User::SESSION]['inadmin'] === true) {
 
 				return true;
 
-			} else if ($inadmin === false){
+			} else if ($inadmin === false) {
 
 				return true;
 
@@ -50,6 +55,7 @@ class User extends Model {
 				return false;
 
 			}
+
 		}
 
 	}
@@ -59,7 +65,7 @@ class User extends Model {
 
 		$sql = new Sql();
 
-		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+		$results = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
 			":LOGIN"=>$login
 		)); 
 
@@ -90,9 +96,13 @@ class User extends Model {
 	public static function verifyLogin($inadmin = true)
 	{
 
-		if (User::checkLogin($inadmin)) {
+		if (!User::checkLogin($inadmin)) {
 
-			header("Location: /admin/login");
+			if ($inadmin) {
+				header("Location: /admin/login");
+			} else {
+				header("Location: /login");
+			}
 			exit;
 
 		}
@@ -215,12 +225,10 @@ class User extends Model {
 			{
 
 				$dataRecovery = $results2[0];
-				$iv = "wNYtCnelXfOa6uiJ";
 
-				//$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
-				$code = base64_encode(openssl_encrypt($dataRecovery["idrecovery"], "AES-256-CBC", User::SECRET, OPENSSL_RAW_DATA, $iv));
+				$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
 
-				$link = "http://www.serveralex.com.br/admin/forgot/reset?code=$code";
+				$link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
 
 				$mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir Senha da Hcode Store", "forgot", array(
 					"name"=>$data["desperson"],
@@ -240,9 +248,8 @@ class User extends Model {
 
 	public static function validForgotDecrypt($code)
 	{
-$iv = "wNYtCnelXfOa6uiJ";
-		//$idrecovery = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, base64_decode($code), MCRYPT_MODE_ECB);
-		$idrecovery = openssl_decrypt(base64_decode($code), "AES-256-CBC", User::SECRET,OPENSSL_RAW_DATA,$iv);
+
+		$idrecovery = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, base64_decode($code), MCRYPT_MODE_ECB);
 
 		$sql = new Sql();
 
@@ -294,6 +301,31 @@ $iv = "wNYtCnelXfOa6uiJ";
 			":password"=>$password,
 			":iduser"=>$this->getiduser()
 		));
+
+	}
+
+	public static function setError($msg)
+	{
+
+		$_SESSION[User::ERROR] = $msg;
+
+	}
+
+	public static function getError()
+	{
+
+		$msg = (isset($_SESSION[User::ERROR]) && $_SESSION[User::ERROR]) ? $_SESSION[User::ERROR] : '';
+
+		User::clearError();
+
+		return $msg;
+
+	}
+
+	public static function clearError()
+	{
+
+		$_SESSION[User::ERROR] = NULL;
 
 	}
 
