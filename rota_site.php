@@ -19,6 +19,7 @@ $app->get('/', function() {
 
 });
 
+//Inicio da rota de detalhes do pruduto
 $app->get("/categories/:idcategory", function($idcategory){
 
 	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
@@ -62,7 +63,9 @@ $app->get("/products/:desurl", function($desurl){
 	]);
 
 });
+//Fim da rota de detalhes do produto
 
+//Inicio da rota do carrinho de compras
 $app->get("/cart", function(){
 
 	$cart = Cart::getFromSession();
@@ -138,7 +141,9 @@ $app->post("/cart/freight", function(){
 	exit;
 
 });
+//Fim da rota do carrinho de compras
 
+//Inicio da rota de login do cliente
 $app->get("/checkout", function(){
 
 	User::verifyLogin(false);
@@ -155,6 +160,7 @@ $app->get("/checkout", function(){
 	]);
 
 });
+
 
 $app->get("/login", function(){
 
@@ -193,7 +199,9 @@ $app->get("/logout", function(){
 	exit;
 
 });
+//Fim da rota de loguin cliente
 
+//Inicio da rota de cadastro de cliente
 $app->post("/register", function(){
 
 	$_SESSION['registerValues'] = $_POST;
@@ -249,5 +257,71 @@ $app->post("/register", function(){
 	exit;
 
 });
+//Fim da rota de Cadastro de cliente
+
+//Inicio da rota de reset de senha
+$app->get("/forgot", function() {
+
+	$page = new Page();
+
+	$page->setTpl("forgot");	
+
+});
+
+$app->post("/forgot", function(){
+
+	$user = User::getForgot($_POST["email"], false);
+
+	header("Location: /forgot/sent");
+	exit;
+
+});
+
+$app->get("/forgot/sent", function(){
+
+	$page = new Page();
+
+	$page->setTpl("forgot-sent");	
+
+});
+
+$app->get("/forgot/reset", function(){
+
+	$user = User::validForgotDecrypt($_GET["code"]);
+
+	$page = new Page();
+
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+
+});
+
+$app->post("/forgot/reset", function(){
+
+	$forgot = User::validForgotDecrypt($_POST["code"]);	
+
+	User::setFogotUsed($forgot["idrecovery"]);
+
+	$user = new User();
+
+	$user->get((int)$forgot["iduser"]);
+
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT, [
+		"cost"=>12
+	]);
+
+	$user->setPassword($password);
+
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-reset-success");
+
+});
+
 
  ?>
