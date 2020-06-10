@@ -164,9 +164,9 @@ class Cart extends Model {
 			WHERE a.idcart = :idcart AND a.dtremoved IS NULL 
 			GROUP BY b.idproduct, b.desproduct , b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl 
 			ORDER BY b.desproduct
-			", [
-				':idcart'=>$this->getidcart()
-			]);
+		", [
+			':idcart'=>$this->getidcart()
+		]);
 
 		return Product::checkList($rows);
 
@@ -182,9 +182,9 @@ class Cart extends Model {
 			FROM tb_products a
 			INNER JOIN tb_cartsproducts b ON a.idproduct = b.idproduct
 			WHERE b.idcart = :idcart AND dtremoved IS NULL;
-			", [
-				':idcart'=>$this->getidcart()
-			]);
+		", [
+			':idcart'=>$this->getidcart()
+		]);
 
 		if (count($results) > 0) {
 			return $results[0];
@@ -320,4 +320,4 @@ class Cart extends Model {
 
 }
 
-?>
+ ?>
